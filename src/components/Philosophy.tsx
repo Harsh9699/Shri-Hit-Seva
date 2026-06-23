@@ -4,7 +4,7 @@ import { useState } from 'react';
 export default function Philosophy() {
   const [isImgLoading, setIsImgLoading] = useState(true);
   const [showPetals, setShowPetals] = useState(false);
-  const acharyaImage = 'https://delightful-crimson-gjnwrj2rep.edgeone.app/1000051571-removebg-preview.png';
+  const acharyaImage = 'https://i.ibb.co/fzVcN8qf/1000051571-removebg.png';
 
   const handlePranam = () => {
     setShowPetals(true);
@@ -260,7 +260,7 @@ export default function Philosophy() {
           >
             <div className="relative z-10 rounded-[32px] overflow-hidden shadow-[0_30px_80px_rgba(44,26,14,0.15)] border-[12px] border-white bg-[var(--color-warm)] h-full">
               <img 
-                src="https://binding-purple-iewud9p9vs.edgeone.app/IMG_20260412_195218.jpg" 
+                src="https://i.ibb.co/jPXs5B2K/IMG-20260412_195218.jpg" 
                 alt="Shri Hit Govind Sharan Premanand ji Maharaj"
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                 referrerPolicy="no-referrer"

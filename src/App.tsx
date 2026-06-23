@@ -12,6 +12,7 @@ import VaaniLibrary from './components/VaaniLibrary';
 import JapCounter from './components/JapCounter';
 import UtsavCalendar from './components/UtsavCalendar';
 import Philosophy from './components/Philosophy';
+import Community from './components/Community';
 import Chatbot from './components/Chatbot';
 import Footer from './components/Footer';
 
@@ -46,6 +47,7 @@ export default function App() {
             {activePage === 'calendar' && <UtsavCalendar />}
             {activePage === 'jap' && <JapCounter />}
             {activePage === 'philosophy' && <Philosophy />}
+            {activePage === 'community' && <Community />}
           </motion.div>
         </AnimatePresence>
       </main>

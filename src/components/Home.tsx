@@ -115,6 +115,12 @@ export default function Home({ onNavigate, onOpenChat }: HomeProps) {
             Philosophy →
           </button>
           <button
+            onClick={() => onNavigate('community')}
+            className="px-8.5 py-3.5 bg-linear-to-br from-emerald-50 to-teal-50 text-emerald-800 border-[1.5px] border-emerald-300 rounded-full font-body text-[15px] font-semibold tracking-wider cursor-pointer shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl flex items-center gap-2"
+          >
+            💬 Satsang Board
+          </button>
+          <button
             onClick={onOpenChat}
             className="px-8 py-3.5 bg-linear-to-br from-[var(--color-honey)] to-[var(--color-rose)] text-[var(--color-gold)] border-[1.5px] border-[var(--color-gold)] rounded-full font-body text-[15px] font-medium cursor-pointer transition-all hover:-translate-y-1 hover:shadow-lg flex items-center gap-2"
           >

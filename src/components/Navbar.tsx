@@ -24,7 +24,7 @@ export default function Navbar({ activePage, onPageChange }: NavbarProps) {
       </div>
       
       <ul className="hidden md:flex items-center gap-7 list-none">
-        {['home', 'vaanis', 'calendar', 'philosophy', 'jap'].map((page) => (
+        {['home', 'vaanis', 'calendar', 'philosophy', 'jap', 'community'].map((page) => (
           <li key={page}>
             <button
               onClick={() => onPageChange(page)}
@@ -45,7 +45,7 @@ export default function Navbar({ activePage, onPageChange }: NavbarProps) {
         <li>
           <button
             onClick={() => onPageChange('vaanis')}
-            className="px-5 py-2 bg-linear-to-br from-[var(--color-honey)] to-[var(--color-petal)] border border-[rgba(196,154,42,0.3)] rounded-full text-[13px] text-[var(--color-inm)] transition-transform hover:-translate-y-0.5"
+            className="px-5 py-2 bg-linear-to-br from-[var(--color-honey)] to-[var(--color-petal)] border border-[rgba(196,154,42,0.3)] rounded-full text-[13px] text-[var(--color-inm)] transition-transform hover:-translate-y-0.5 pointer-events-auto cursor-pointer"
           >
             🪷 Explore
           </button>

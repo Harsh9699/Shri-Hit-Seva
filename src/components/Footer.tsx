@@ -17,6 +17,7 @@ export default function Footer({ onNavigate }: { onNavigate: (page: string) => v
           <li><button onClick={() => onNavigate('calendar')} className="text-[13px] font-light text-[rgba(255,255,255,0.3)] hover:text-[rgba(196,154,42,0.75)] transition-colors cursor-pointer">Divine Calendar</button></li>
           <li><button onClick={() => onNavigate('jap')} className="text-[13px] font-light text-[rgba(255,255,255,0.3)] hover:text-[rgba(196,154,42,0.75)] transition-colors cursor-pointer">Naam Jap</button></li>
           <li><button onClick={() => onNavigate('philosophy')} className="text-[13px] font-light text-[rgba(255,255,255,0.3)] hover:text-[rgba(196,154,42,0.75)] transition-colors cursor-pointer">Philosophy</button></li>
+          <li><button onClick={() => onNavigate('community')} className="text-[13px] font-light text-[rgba(255,255,255,0.3)] hover:text-[rgba(196,154,42,0.75)] transition-colors cursor-pointer">Community Board</button></li>
         </ul>
       </div>
 
