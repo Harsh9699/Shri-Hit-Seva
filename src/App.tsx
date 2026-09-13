@@ -8,6 +8,10 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
+import DailySadhana from './components/DailySadhana';
+import Satsang from './components/Satsang';
+import AdminSatsang from './components/AdminSatsang';
+import { LanguageProvider } from './context/LanguageContext';
 import VaaniLibrary from './components/VaaniLibrary';
 import JapCounter from './components/JapCounter';
 import GuruSanidhya from './components/GuruSanidhya';
@@ -79,11 +83,13 @@ export default function App() {
               />
             )}
             {activePage === 'vaanis' && <VaaniLibrary />}
+            {activePage === 'satsang' && <Satsang />}
             {activePage === 'calendar' && <UtsavCalendar />}
             {activePage === 'jap' && <JapCounter />}
             {activePage === 'sanidhya' && <GuruSanidhya />}
             {activePage === 'philosophy' && <Philosophy />}
             {activePage === 'community' && <Community />}
+            {activePage === 'admin' && <AdminSatsang />}
           </motion.div>
         </AnimatePresence>
       </main>

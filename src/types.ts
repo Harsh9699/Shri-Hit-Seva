@@ -48,3 +48,16 @@ export interface ChatMessage {
   content: string;
   timestamp: number;
 }
+
+export interface SatsangEvent {
+  id?: string;
+  title: string;
+  dateStr: string;
+  timeStr: string;
+  meetLink?: string;
+  videoUrl?: string; // YouTube or Drive link
+  thumbnailUrl?: string;
+  status: 'upcoming' | 'completed';
+  duration?: string;
+  createdAt: number;
+}

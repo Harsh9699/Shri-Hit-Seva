@@ -52,11 +52,11 @@ export default function Navbar({ activePage, onPageChange }: NavbarProps) {
     }
   };
 
-  const navLinks = ['home', 'vaanis', 'calendar', 'philosophy', 'jap', 'sanidhya', 'community'];
+  const navLinks = ['home', 'vaanis', 'satsang', 'calendar', 'philosophy', 'jap', 'sanidhya', 'community'];
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-[900] px-4 md:px-11 h-[66px] flex items-center justify-between bg-[rgba(255,255,255,0.75)] backdrop-blur-xl border-b border-[var(--bdr)] transition-shadow duration-300 shadow-[0_4px_30px_rgba(74,59,44,0.05)]">
+      <nav className="fixed top-0 left-0 right-0 z-[900] px-3 md:px-4 lg:px-8 h-[66px] flex items-center justify-between bg-[rgba(255,255,255,0.75)] backdrop-blur-xl border-b border-[var(--bdr)] transition-shadow duration-300 shadow-[0_4px_30px_rgba(74,59,44,0.05)]">
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => { onPageChange('home'); setIsMobileMenuOpen(false); }}>
           <div className="w-[42px] h-[42px] rounded-full overflow-hidden border-[1.5px] border-[var(--color-gold)] flex items-center justify-center bg-white breathe shadow-[0_0_15px_rgba(214,185,92,0.3)]">
             <img 
@@ -73,14 +73,14 @@ export default function Navbar({ activePage, onPageChange }: NavbarProps) {
         </div>
         
         {/* Desktop Navigation */}
-        <ul className="hidden md:flex items-center gap-7 list-none">
+        <ul className="hidden lg:flex items-center gap-3 xl:gap-5 list-none">
           {navLinks.map((page) => {
             let labelKey = `nav.${page === 'jap' ? 'naamJap' : page}`;
             return (
               <li key={page}>
                 <button
                   onClick={() => onPageChange(page)}
-                  className={`font-body text-[14.5px] tracking-wide relative pb-0.5 cursor-pointer transition-colors duration-300 ${
+                  className={`font-body text-[13px] lg:text-[14px] tracking-wide relative pb-0.5 cursor-pointer transition-colors duration-300 ${
                     activePage === page ? 'text-[var(--color-ink)] font-semibold' : 'text-[var(--color-inm)] hover:text-[var(--color-ink)]'
                   }`}
                 >
@@ -95,27 +95,27 @@ export default function Navbar({ activePage, onPageChange }: NavbarProps) {
               </li>
             );
           })}
-          <li className="flex items-center gap-3 border-l border-[var(--bdr)] pl-4 ml-2">
+          <li className="flex items-center gap-2 lg:gap-3 border-l border-[var(--bdr)] pl-2 lg:pl-4 ml-1 lg:ml-2">
             <button
               onClick={handleInstallClick}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-gold)]/10 text-[var(--color-ink)] hover:bg-[var(--color-gold)]/20 transition-colors text-[12px] font-semibold cursor-pointer"
+              className="flex items-center gap-1 lg:gap-1.5 px-2 lg:px-3 py-1.5 rounded-full bg-[var(--color-gold)]/10 text-[var(--color-ink)] hover:bg-[var(--color-gold)]/20 transition-colors text-[11px] lg:text-[12px] font-semibold cursor-pointer"
               title="Install App"
             >
-              <Download size={14} /> Install App
+              <Download size={14} /> <span className="hidden xl:inline">Install App</span>
             </button>
 
             
             <button
               onClick={handleForceUpdate}
-              className="text-[12px] font-bold text-[var(--color-ink)] hover:text-red-600 transition-colors cursor-pointer px-2 py-1 rounded-md border border-[var(--color-gold)]/40 hover:border-red-500 hover:bg-red-50"
+              className="text-[11px] lg:text-[12px] font-bold text-[var(--color-ink)] hover:text-red-600 transition-colors cursor-pointer px-2 py-1 rounded-md border border-[var(--color-gold)]/40 hover:border-red-500 hover:bg-red-50"
               title="Check for Updates"
             >
-              <RefreshCw size={14} className="inline mr-1 mb-0.5" /> Update
+              <RefreshCw size={14} className="inline mr-1 mb-0.5" /> <span className="hidden xl:inline">Update</span>
             </button>
 
             <button
               onClick={() => setLanguage(language === 'en' ? 'hi' : 'en')}
-              className="text-[12px] font-bold text-[var(--color-ink)] hover:text-[var(--color-ink)] transition-colors cursor-pointer px-2 py-1 rounded-md border border-[var(--color-gold)]/40 hover:border-[var(--color-gold)] hover:bg-[var(--color-honey)]/20"
+              className="text-[11px] lg:text-[12px] font-bold text-[var(--color-ink)] hover:text-[var(--color-ink)] transition-colors cursor-pointer px-2 py-1 rounded-md border border-[var(--color-gold)]/40 hover:border-[var(--color-gold)] hover:bg-[var(--color-honey)]/20 whitespace-nowrap"
               title="Switch Language"
             >
               {language === 'en' ? 'A / अ' : 'अ / A'}
@@ -123,7 +123,7 @@ export default function Navbar({ activePage, onPageChange }: NavbarProps) {
             
             <button
               onClick={() => onPageChange('vaanis')}
-              className="px-6 py-2 bg-linear-to-r from-[var(--color-honey)] to-[var(--color-saffron)] text-[var(--color-ink)] rounded-full text-[13px] tracking-widest uppercase transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_15px_rgba(214,185,92,0.4)] pointer-events-auto cursor-pointer font-bold"
+              className="px-3 lg:px-5 py-1.5 lg:py-2 bg-linear-to-r from-[var(--color-honey)] to-[var(--color-saffron)] text-[var(--color-ink)] rounded-full text-[11px] lg:text-[13px] tracking-widest uppercase transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_15px_rgba(214,185,92,0.4)] pointer-events-auto cursor-pointer font-bold whitespace-nowrap"
             >
               {t('nav.explore')}
             </button>
@@ -131,7 +131,7 @@ export default function Navbar({ activePage, onPageChange }: NavbarProps) {
         </ul>
 
         {/* Mobile Navigation Toggle */}
-        <div className="flex md:hidden items-center gap-3">
+        <div className="flex lg:hidden items-center gap-3">
           <button
             onClick={handleInstallClick}
             className="p-1.5 rounded-full bg-[var(--color-gold)]/10 text-[var(--color-ink)]"
@@ -154,7 +154,7 @@ export default function Navbar({ activePage, onPageChange }: NavbarProps) {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-[800] pt-[66px] bg-[var(--color-cream)]/95 backdrop-blur-3xl md:hidden"
+            className="fixed inset-0 z-[800] pt-[66px] bg-[var(--color-cream)]/95 backdrop-blur-3xl lg:hidden"
           >
             <div className="flex flex-col p-6 gap-6 h-full overflow-y-auto">
               <ul className="flex flex-col gap-4 list-none">

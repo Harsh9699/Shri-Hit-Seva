@@ -7,7 +7,9 @@ export default function Footer({ onNavigate }: { onNavigate: (page: string) => v
     <footer className="bg-[var(--color-warm)] border-t border-[var(--bdrS)] px-11 py-14 grid grid-cols-1 md:grid-cols-3 gap-11">
       <div>
         <div className="font-display text-[16px] text-[var(--color-ink)] mb-1.5 font-bold">Shri Hit Seva</div>
-        <div className="font-devanagari text-[12px] text-[var(--color-gold)] mb-4.5">श्री हित सेवा 🪷</div>
+        <div className="font-devanagari text-[12px] text-[var(--color-gold)] mb-4.5 flex items-center gap-1">
+          श्री हित सेवा <span className="cursor-default hover:opacity-80" onClick={() => onNavigate('admin')}>🪷</span>
+        </div>
         <div className="text-[13px] font-light text-[var(--color-inm)] leading-relaxed">
           {language === 'hi' 
             ? 'वृन्दावन में स्थित राधावल्लभ संप्रदाय का सम्पूर्ण पवित्र पुस्तकालय।'
@@ -45,8 +47,9 @@ export default function Footer({ onNavigate }: { onNavigate: (page: string) => v
         <div className="text-[12px] font-light text-[var(--color-inmu)]">
           {language === 'hi' ? '© 2026 श्री हित सेवा · भक्ति के साथ निर्मित' : '© 2026 Shri Hit Seva · Built with devotion'}
         </div>
-        <div className="font-devanagari text-[13px] text-[var(--color-gold)] font-bold">
-          श्री राधावल्लभ लाल की जय 🪷
+        <div className="font-devanagari text-[13px] text-[var(--color-gold)] font-bold flex items-center gap-1">
+          श्री राधावल्लभ लाल की जय 
+          <span className="cursor-default hover:opacity-80" onClick={() => onNavigate('admin')}>🪷</span>
         </div>
       </div>
     </footer>

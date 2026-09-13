@@ -70,75 +70,77 @@ export default function Home({ onNavigate, onOpenChat }: HomeProps) {
   const acharyaImage = 'https://i.postimg.cc/x82K8p3C/1000051571-removebg-preview.png';
   return (
     <div className="min-h-screen">
-      <section className="relative min-h-[calc(100vh-66px)] flex flex-col items-center justify-center text-center px-8 py-20 overflow-hidden">
+      <section className="relative min-h-[calc(100vh-66px)] flex flex-col items-center justify-start text-center px-8 pt-8 pb-12 overflow-hidden radhashtami-bg">
+        {/* Background Image for Radhashtami */}
+        <img 
+          src="/hero-image.png" 
+          alt="Radhashtami Lotus Pond"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        />
+
+        {/* Dark Overlay to make the background darker and text readable */}
+        <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+
         {/* Soft, mystical Nikunj background glow */}
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_0%,rgba(224,184,58,0.15)_0%,transparent_60%),radial-gradient(circle_at_20%_80%,rgba(255,182,193,0.1)_0%,transparent_50%)]" />
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_0%,rgba(224,184,58,0.1)_0%,transparent_60%),radial-gradient(circle_at_20%_80%,rgba(255,255,255,0.05)_0%,transparent_50%)]" />
         
+        {/* Sun Ray Effect for 4 AM */}
+        <div className="sun-ray w-[100vw] h-[100vh] top-1/2 left-0 -translate-y-1/2 opacity-50" />
+        <div className="sun-ray w-[100vw] h-[100vh] top-1/2 left-0 -translate-y-1/2 delay-75 [animation-direction:reverse] opacity-50" />
+
         {/* Subtle, elegant rotating rings with gold tint */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(75vw,700px)] aspect-square rounded-full border border-[var(--bdr)] pointer-events-none sspin" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(55vw,500px)] aspect-square rounded-full border border-[var(--bdrS)] pointer-events-none sspin [animation-duration:90s] [animation-direction:reverse]" />
-        
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(75vw,700px)] aspect-square rounded-full border border-white/10 pointer-events-none sspin" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(55vw,500px)] aspect-square rounded-full border border-white/5 pointer-events-none sspin [animation-duration:90s] [animation-direction:reverse]" />
+
+        {/* TOP SECTION: Greeting */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: 'easeOut' }}
-          className="font-body text-[12px] tracking-[0.25em] uppercase text-[var(--color-gdp)] mb-6 relative z-10 font-medium"
+          transition={{ duration: 1 }}
+          className="flex flex-col items-center z-20 w-full px-4 mt-2"
         >
-          {language === 'hi' ? 'राधावल्लभ संप्रदाय · स्था. 1535 · वृन्दावन' : 'Radhavallabh Sampradaya · Est. 1535 · Vrindavan'}
+          <div className="bg-black/20 backdrop-blur-md border border-white/20 rounded-full px-5 py-1.5 mb-4 shadow-[0_0_15px_rgba(44,82,130,0.5)]">
+            <span className="font-body text-[10px] lg:text-[11px] tracking-[0.2em] text-[var(--color-dawn-gold)] uppercase font-bold">
+              {t('radhashtami.tag')}
+            </span>
+          </div>
+          
+          <h2 className={`text-white drop-shadow-lg ${language === 'hi' ? 'font-devanagari text-[clamp(28px,5vw,40px)]' : 'font-display text-[clamp(32px,5vw,46px)] italic'}`}>
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-[var(--color-dawn-gold)] to-yellow-100">
+              {t('radhashtami.badhai')}
+            </span>
+          </h2>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.9 }}
-          className="font-devanagari text-[clamp(18px,3.5vw,24px)] font-normal text-[var(--color-inm)] opacity-90 mb-5 leading-relaxed relative z-10 drop-shadow-md"
-        >
-          श्री राधावल्लभ लाल की जय
-        </motion.div>
+        {/* BOTTOM SECTION: Text & Buttons */}
+        <div className="flex flex-col items-center w-full z-20 mt-auto">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 1 }}
+            className="font-body text-[13px] lg:text-[16px] text-white/90 italic tracking-wide max-w-[600px] leading-relaxed drop-shadow-md bg-black/10 p-4 rounded-xl backdrop-blur-[2px] border border-white/10 mb-6"
+          >
+            {t('radhashtami.special_text')}
+          </motion.p>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 1 }}
-          className="font-display text-[clamp(36px,7vw,76px)] font-normal leading-[1.1] tracking-tight text-[var(--color-ink)] mb-6 relative z-10 max-w-[900px] drop-shadow-lg"
-        >
-          {language === 'hi' ? (
-            <>जहाँ प्रेम ही<br /><em className="text-transparent bg-clip-text bg-linear-to-r from-[var(--color-honey)] to-[var(--color-gold)] not-italic pr-4 drop-shadow-sm">सर्वोच्च सत्य है</em></>
-          ) : (
-            <>Where Love is the<br /><em className="text-transparent bg-clip-text bg-linear-to-r from-[var(--color-honey)] to-[var(--color-gold)] not-italic italic pr-4 drop-shadow-sm">Highest Truth</em></>
-          )}
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45, duration: 1 }}
-          className="font-body text-[clamp(17px,2.2vw,22px)] font-light leading-relaxed text-[var(--color-ins)] max-w-[540px] mb-12 relative z-10"
-        >
-          {language === 'hi' 
-            ? 'सबसे मधुर और अंतरंग परंपरा — हितोपासना, सहचरी भाव, नित्य विहार। जहाँ श्री राधा सर्वोपरि हैं।'
-            : 'The sweetest, most intimate tradition — Hitopasana, Sahchari Bhav, Nitya Vihar. Shri Radha reigns supreme.'}
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 1 }}
-          className="flex flex-col sm:flex-row items-center gap-5 justify-center relative z-10"
-        >
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 1 }}
+            className="flex flex-col sm:flex-row items-center gap-5 justify-center relative z-10"
+          >
           <button
             onClick={() => onNavigate('vaanis')}
-            className="w-full sm:w-auto px-10 py-4 bg-linear-to-r from-[var(--color-honey)] to-[var(--color-saffron)] text-[var(--color-ink)] border-none rounded-full font-body text-[16px] tracking-widest uppercase cursor-pointer shadow-[0_4px_15px_rgba(214,185,92,0.3)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_6px_20px_rgba(214,185,92,0.4)] font-bold"
+            className="w-full sm:w-auto px-10 py-4 bg-linear-to-r from-[var(--color-dawn-gold)] to-yellow-200 text-[var(--color-dawn-deep)] border-none rounded-full font-body text-[16px] tracking-widest uppercase cursor-pointer shadow-[0_4px_15px_rgba(255,215,0,0.3)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_6px_20px_rgba(255,215,0,0.4)] font-bold"
           >
             {t('home.explore')}
           </button>
           
           <button
             onClick={onOpenChat}
-            className="glass-panel w-full sm:w-auto px-10 py-4 text-[var(--color-ink)] rounded-full font-body text-[16px] tracking-widest uppercase cursor-pointer transition-all duration-300 hover:bg-[rgba(255,255,255,0.8)] hover:border-[var(--color-honey)] hover:-translate-y-1 flex items-center justify-center gap-2 font-bold"
+            className="bg-white/10 backdrop-blur-md border border-white/20 w-full sm:w-auto px-10 py-4 text-white rounded-full font-body text-[16px] tracking-widest uppercase cursor-pointer transition-all duration-300 hover:bg-white/20 hover:border-white/40 hover:-translate-y-1 flex items-center justify-center gap-2 font-bold"
           >
             <span className="text-[18px]">✨</span> {t('home.ask')}
-          
           </button>
         </motion.div>
 
@@ -151,7 +153,7 @@ export default function Home({ onNavigate, onOpenChat }: HomeProps) {
               transition={{ delay: 0.8, duration: 1 }}
               className="mt-12 relative z-10 flex flex-col items-center"
             >
-              <div className="font-body text-[11px] tracking-widest uppercase text-[var(--color-gold)] mb-4">
+              <div className="font-body text-[11px] tracking-widest uppercase text-white/80 mb-4">
                 {language === 'hi' ? 'आपकी साधना उपलब्धियां' : 'Your Sadhana Achievements'}
               </div>
               <div className="flex flex-wrap justify-center gap-4">
@@ -174,6 +176,7 @@ export default function Home({ onNavigate, onOpenChat }: HomeProps) {
             </motion.div>
           )}
         </AnimatePresence>
+        </div>
       </section>
 
       <div className="overflow-hidden glass-panel border-x-0 py-3">

@@ -12,12 +12,14 @@ interface LanguageContextType {
 const translations = {
   en: {
     'nav.home': 'Home',
-    'nav.vaani': 'Vaani Library',
+    'nav.vaanis': 'Vaanis',
     'nav.calendar': 'Calendar',
     'nav.philosophy': 'Philosophy',
     'nav.naamJap': 'Naam Jap',
     'nav.sanidhya': 'Guru Sanidhya',
     'nav.community': 'Community',
+    'nav.satsang': 'Satsang',
+    'nav.admin': 'Admin',
     'nav.explore': 'Explore',
     
     'jap.title': 'Naam Jap',
@@ -38,16 +40,24 @@ const translations = {
     'jap.perfect': 'Perfect',
 
     'home.explore': 'Explore Vaanis',
-    'home.ask': 'Ask Harivanshi'
+    'home.ask': 'Ask Harivanshi',
+
+    'radhashtami.greeting': 'Celebrating the Appearance of our Swamini',
+    'radhashtami.subtitle': 'Brahma Muhurta (4:00 AM) · The Dawn of Divine Love',
+    'radhashtami.tag': 'RADHASHTAMI SPECIAL',
+    'radhashtami.badhai': 'Radhashtami ki Anant Badhai!',
+    'radhashtami.special_text': 'On this sacred day, the Supreme Queen of Vrindavan descended to bless the world with the purest divine love. She is the very soul of Nitya Vihar.'
   },
   hi: {
     'nav.home': 'मुख्य पृष्ठ',
-    'nav.vaani': 'वाणी संग्रह',
+    'nav.vaanis': 'वाणियाँ',
     'nav.calendar': 'उत्सव कैलेंडर',
     'nav.philosophy': 'दर्शन',
     'nav.naamJap': 'नाम जप',
-    'nav.sanidhya': 'गुरु सान्निध्य',
+    'nav.sanidhya': 'गुरु सानिध्य',
     'nav.community': 'समुदाय',
+    'nav.satsang': 'सत्संग',
+    'nav.admin': 'व्यवस्थापक',
     'nav.explore': 'खोजें',
     
     'jap.title': 'नाम जप',
@@ -68,7 +78,13 @@ const translations = {
     'jap.perfect': 'संपूर्ण',
 
     'home.explore': 'वाणियाँ खोजें',
-    'home.ask': 'हरिवंशी से पूछें'
+    'home.ask': 'हरिवंशी से पूछें',
+
+    'radhashtami.greeting': 'हमारी स्वामिनी के प्राकट्योत्सव का आनंद',
+    'radhashtami.subtitle': 'ब्रह्म मुहूर्त (प्रातः 4:00) · दिव्य प्रेम का उदय',
+    'radhashtami.tag': 'राधाष्टमी विशेष',
+    'radhashtami.badhai': 'राधाष्टमी की अनंत बधाई!',
+    'radhashtami.special_text': 'इस पावन दिवस पर, वृन्दावन की अधीश्वरी ने विश्व को सर्वोच्च दिव्य प्रेम का आशीर्वाद देने के लिए अवतार लिया। वे ही नित्य विहार की आत्मा हैं।'
   }
 };
 
