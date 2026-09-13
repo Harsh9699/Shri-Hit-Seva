@@ -72,11 +72,15 @@ export default function Home({ onNavigate, onOpenChat }: HomeProps) {
     <div className="min-h-screen">
       <section className="relative min-h-[calc(100vh-66px)] flex flex-col items-center justify-start text-center px-8 pt-8 pb-12 overflow-hidden radhashtami-bg">
         {/* Background Image for Radhashtami */}
-        <img 
-          src="/hero-image.png" 
-          alt="Radhashtami Lotus Pond"
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-        />
+        <picture className="absolute inset-0 w-full h-full pointer-events-none">
+          <source media="(max-width: 768px)" srcSet="/hero-image-mobile.jpg" />
+          <source media="(min-width: 769px)" srcSet="/hero-image.png" />
+          <img 
+            src="/hero-image.png" 
+            alt="Radhashtami Lotus Pond"
+            className="w-full h-full object-cover"
+          />
+        </picture>
 
         {/* Dark Overlay to make the background darker and text readable */}
         <div className="absolute inset-0 bg-black/40 pointer-events-none" />
