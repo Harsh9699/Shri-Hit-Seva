@@ -55,9 +55,11 @@ export interface SatsangEvent {
   dateStr: string;
   timeStr: string;
   meetLink?: string;
-  videoUrl?: string; // YouTube or Drive link
+  videoUrl?: string; // YouTube, Drive, or Firebase Storage URL
   thumbnailUrl?: string;
   status: 'upcoming' | 'completed';
   duration?: string;
   createdAt: number;
+  seriesName?: string; // e.g., "Hit Harivansh Charitamrit"
+  partNumber?: number; // e.g., 1, 2, 3
 }

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { db } from '../lib/firebase';
+import { db, storage } from '../lib/firebase';
 import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { SatsangEvent } from '../types';
-import { Calendar, Clock, Video, PlayCircle, Trash2, Edit2, Plus, Lock } from 'lucide-react';
+import { Calendar, Clock, Video, PlayCircle, Trash2, Edit2, Plus, Lock, UploadCloud } from 'lucide-react';
 
 export default function AdminSatsang() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -11,8 +12,12 @@ export default function AdminSatsang() {
   const [events, setEvents] = useState<SatsangEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ video: number; thumbnail: number }>({ video: 0, thumbnail: 0 });
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+
   const [currentEvent, setCurrentEvent] = useState<Partial<SatsangEvent>>({
-    title: '', dateStr: '', timeStr: '', meetLink: '', videoUrl: '', thumbnailUrl: '', status: 'upcoming', duration: ''
+    title: '', dateStr: '', timeStr: '', meetLink: '', videoUrl: '', thumbnailUrl: '', status: 'upcoming', duration: '', seriesName: '', partNumber: undefined
   });
 
   useEffect(() => {
@@ -29,6 +34,111 @@ export default function AdminSatsang() {
       alert('Incorrect password');
       setPassword('');
     }
+  };
+
+  const fetchEvents = async () => {
+    setIsLoading(true);
+    try {
+      const q = query(collection(db, 'satsangs'), orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      const fetchedEvents: SatsangEvent[] = [];
+      querySnapshot.forEach((doc) => {
+        fetchedEvents.push({ id: doc.id, ...doc.data() } as SatsangEvent);
+      });
+      setEvents(fetchedEvents);
+    } catch (error) {
+      console.error("Error fetching events: ", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const uploadFile = (file: File, type: 'video' | 'thumbnail'): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const storageRef = ref(storage, `satsangs/${Date.now()}_${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on('state_changed', 
+        (snapshot) => {
+          const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+          setUploadProgress(prev => ({ ...prev, [type]: progress }));
+        },
+        (error) => {
+          console.error(`Error uploading ${type}:`, error);
+          reject(error);
+        },
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          resolve(downloadURL);
+        }
+      );
+    });
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      let finalVideoUrl = currentEvent.videoUrl;
+      let finalThumbnailUrl = currentEvent.thumbnailUrl;
+
+      // Upload local files if selected
+      if (videoFile) {
+        finalVideoUrl = await uploadFile(videoFile, 'video');
+      }
+      if (thumbnailFile) {
+        finalThumbnailUrl = await uploadFile(thumbnailFile, 'thumbnail');
+      }
+
+      const eventData = {
+        ...currentEvent,
+        videoUrl: finalVideoUrl,
+        thumbnailUrl: finalThumbnailUrl,
+        partNumber: currentEvent.partNumber ? Number(currentEvent.partNumber) : null
+      };
+
+      if (currentEvent.id) {
+        const docRef = doc(db, 'satsangs', currentEvent.id);
+        await updateDoc(docRef, eventData);
+      } else {
+        await addDoc(collection(db, 'satsangs'), {
+          ...eventData,
+          createdAt: Date.now()
+        });
+      }
+      
+      resetForm();
+      fetchEvents();
+    } catch (error) {
+      console.error("Error saving event: ", error);
+      alert('Error saving event. Please make sure Firebase Storage is enabled and rules allow writes.');
+    }
+  };
+
+  const resetForm = () => {
+    setIsEditing(false);
+    setVideoFile(null);
+    setThumbnailFile(null);
+    setUploadProgress({ video: 0, thumbnail: 0 });
+    setCurrentEvent({ title: '', dateStr: '', timeStr: '', meetLink: '', videoUrl: '', thumbnailUrl: '', status: 'upcoming', duration: '', seriesName: '', partNumber: undefined });
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this event?')) {
+      try {
+        await deleteDoc(doc(db, 'satsangs', id));
+        fetchEvents();
+      } catch (error) {
+        console.error("Error deleting event: ", error);
+      }
+    }
+  };
+
+  const editEvent = (ev: SatsangEvent) => {
+    setCurrentEvent(ev);
+    setVideoFile(null);
+    setThumbnailFile(null);
+    setUploadProgress({ video: 0, thumbnail: 0 });
+    setIsEditing(true);
   };
 
   if (!isAuthenticated) {
@@ -54,61 +164,6 @@ export default function AdminSatsang() {
     );
   }
 
-  const fetchEvents = async () => {
-    setIsLoading(true);
-    try {
-      const q = query(collection(db, 'satsangs'), orderBy('createdAt', 'desc'));
-      const querySnapshot = await getDocs(q);
-      const fetchedEvents: SatsangEvent[] = [];
-      querySnapshot.forEach((doc) => {
-        fetchedEvents.push({ id: doc.id, ...doc.data() } as SatsangEvent);
-      });
-      setEvents(fetchedEvents);
-    } catch (error) {
-      console.error("Error fetching events: ", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (currentEvent.id) {
-        // Update
-        const docRef = doc(db, 'satsangs', currentEvent.id);
-        await updateDoc(docRef, { ...currentEvent });
-      } else {
-        // Create
-        await addDoc(collection(db, 'satsangs'), {
-          ...currentEvent,
-          createdAt: Date.now()
-        });
-      }
-      setIsEditing(false);
-      setCurrentEvent({ title: '', dateStr: '', timeStr: '', meetLink: '', videoUrl: '', thumbnailUrl: '', status: 'upcoming', duration: '' });
-      fetchEvents();
-    } catch (error) {
-      console.error("Error saving event: ", error);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this event?')) {
-      try {
-        await deleteDoc(doc(db, 'satsangs', id));
-        fetchEvents();
-      } catch (error) {
-        console.error("Error deleting event: ", error);
-      }
-    }
-  };
-
-  const editEvent = (ev: SatsangEvent) => {
-    setCurrentEvent(ev);
-    setIsEditing(true);
-  };
-
   return (
     <div className="min-h-screen pt-[86px] pb-20 bg-[#0B192C] text-white px-6">
       <div className="max-w-[800px] mx-auto">
@@ -117,7 +172,7 @@ export default function AdminSatsang() {
           {!isEditing && (
             <button 
               onClick={() => {
-                setCurrentEvent({ title: '', dateStr: '', timeStr: '', meetLink: '', videoUrl: '', thumbnailUrl: '', status: 'upcoming', duration: '' });
+                resetForm();
                 setIsEditing(true);
               }}
               className="bg-[var(--color-dawn-gold)] text-[#0B192C] px-4 py-2 rounded-full font-bold flex items-center gap-2"
@@ -134,6 +189,17 @@ export default function AdminSatsang() {
             <div>
               <label className="block text-sm opacity-70 mb-1">Title</label>
               <input required type="text" className="w-full bg-black/30 border border-white/20 rounded p-2 text-white" value={currentEvent.title} onChange={e => setCurrentEvent({...currentEvent, title: e.target.value})} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm opacity-70 mb-1">Series Name (e.g. Hit Harivansh Charitamrit)</label>
+                <input type="text" className="w-full bg-black/30 border border-white/20 rounded p-2 text-white" placeholder="Leave empty if standalone" value={currentEvent.seriesName || ''} onChange={e => setCurrentEvent({...currentEvent, seriesName: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-sm opacity-70 mb-1">Part Number (e.g. 1)</label>
+                <input type="number" className="w-full bg-black/30 border border-white/20 rounded p-2 text-white" value={currentEvent.partNumber || ''} onChange={e => setCurrentEvent({...currentEvent, partNumber: parseInt(e.target.value)})} />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -158,32 +224,45 @@ export default function AdminSatsang() {
             {currentEvent.status === 'upcoming' && (
               <div>
                 <label className="block text-sm opacity-70 mb-1">Google Meet Link</label>
-                <input type="text" className="w-full bg-black/30 border border-white/20 rounded p-2 text-white" value={currentEvent.meetLink} onChange={e => setCurrentEvent({...currentEvent, meetLink: e.target.value})} />
+                <input type="text" className="w-full bg-black/30 border border-white/20 rounded p-2 text-white" value={currentEvent.meetLink || ''} onChange={e => setCurrentEvent({...currentEvent, meetLink: e.target.value})} />
               </div>
             )}
 
             {currentEvent.status === 'completed' && (
               <>
-                <div>
-                  <label className="block text-sm opacity-70 mb-1">Video Recording URL (YouTube/Drive)</label>
-                  <input type="text" className="w-full bg-black/30 border border-white/20 rounded p-2 text-white" value={currentEvent.videoUrl} onChange={e => setCurrentEvent({...currentEvent, videoUrl: e.target.value})} />
+                <div className="p-4 bg-black/20 rounded-lg border border-white/10">
+                  <label className="block text-sm font-bold text-[var(--color-dawn-gold)] mb-2 flex items-center gap-2"><UploadCloud size={16}/> Upload Video File</label>
+                  <input type="file" accept="video/*" onChange={e => setVideoFile(e.target.files?.[0] || null)} className="w-full text-sm opacity-70 mb-2" />
+                  {uploadProgress.video > 0 && uploadProgress.video < 100 && (
+                    <div className="w-full bg-white/10 rounded-full h-1.5 mt-2"><div className="bg-[var(--color-dawn-gold)] h-1.5 rounded-full" style={{width: `${uploadProgress.video}%`}}></div></div>
+                  )}
+                  <div className="text-xs opacity-50 mt-2">Or use an external URL:</div>
+                  <input type="text" className="w-full bg-black/30 border border-white/20 rounded p-2 text-white mt-1 text-sm" placeholder="https://youtube.com/..." value={currentEvent.videoUrl || ''} onChange={e => setCurrentEvent({...currentEvent, videoUrl: e.target.value})} />
                 </div>
+
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm opacity-70 mb-1">Thumbnail Image URL</label>
-                    <input type="text" className="w-full bg-black/30 border border-white/20 rounded p-2 text-white" value={currentEvent.thumbnailUrl} onChange={e => setCurrentEvent({...currentEvent, thumbnailUrl: e.target.value})} />
+                  <div className="p-4 bg-black/20 rounded-lg border border-white/10">
+                    <label className="block text-sm font-bold text-[var(--color-dawn-gold)] mb-2 flex items-center gap-2"><UploadCloud size={16}/> Upload Thumbnail</label>
+                    <input type="file" accept="image/*" onChange={e => setThumbnailFile(e.target.files?.[0] || null)} className="w-full text-sm opacity-70 mb-2" />
+                    {uploadProgress.thumbnail > 0 && uploadProgress.thumbnail < 100 && (
+                      <div className="w-full bg-white/10 rounded-full h-1.5 mt-2"><div className="bg-[var(--color-dawn-gold)] h-1.5 rounded-full" style={{width: `${uploadProgress.thumbnail}%`}}></div></div>
+                    )}
+                    <div className="text-xs opacity-50 mt-2">Or use an external URL:</div>
+                    <input type="text" className="w-full bg-black/30 border border-white/20 rounded p-2 text-white mt-1 text-sm" value={currentEvent.thumbnailUrl || ''} onChange={e => setCurrentEvent({...currentEvent, thumbnailUrl: e.target.value})} />
                   </div>
                   <div>
                     <label className="block text-sm opacity-70 mb-1">Duration (e.g. 1 hr 45 min)</label>
-                    <input type="text" className="w-full bg-black/30 border border-white/20 rounded p-2 text-white" value={currentEvent.duration} onChange={e => setCurrentEvent({...currentEvent, duration: e.target.value})} />
+                    <input type="text" className="w-full bg-black/30 border border-white/20 rounded p-2 text-white" value={currentEvent.duration || ''} onChange={e => setCurrentEvent({...currentEvent, duration: e.target.value})} />
                   </div>
                 </div>
               </>
             )}
 
             <div className="flex justify-end gap-3 pt-4">
-              <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 opacity-70 hover:opacity-100">Cancel</button>
-              <button type="submit" className="bg-[var(--color-dawn-gold)] text-[#0B192C] px-6 py-2 rounded font-bold">Save Satsang</button>
+              <button type="button" onClick={resetForm} className="px-4 py-2 opacity-70 hover:opacity-100">Cancel</button>
+              <button type="submit" disabled={uploadProgress.video > 0 && uploadProgress.video < 100} className="bg-[var(--color-dawn-gold)] text-[#0B192C] px-6 py-2 rounded font-bold disabled:opacity-50">
+                {uploadProgress.video > 0 && uploadProgress.video < 100 ? `Uploading (${uploadProgress.video}%)` : 'Save Satsang'}
+              </button>
             </div>
           </form>
         )}
@@ -207,7 +286,7 @@ export default function AdminSatsang() {
                       <h3 className="font-bold text-lg">{ev.title}</h3>
                       <div className="text-sm opacity-60 flex gap-3">
                         <span className="flex items-center gap-1"><Calendar size={14}/> {ev.dateStr}</span>
-                        <span className="flex items-center gap-1"><Clock size={14}/> {ev.timeStr}</span>
+                        {ev.seriesName && <span className="bg-white/10 px-2 py-0.5 rounded text-xs">{ev.seriesName} (Part {ev.partNumber})</span>}
                         <span className="uppercase text-xs font-bold px-2 py-0.5 rounded bg-white/10">{ev.status}</span>
                       </div>
                     </div>
