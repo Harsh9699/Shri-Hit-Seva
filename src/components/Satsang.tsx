@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Video, Calendar, Clock, PlayCircle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useState, useEffect } from 'react';
@@ -138,39 +138,7 @@ export default function Satsang() {
                 </div>
                 
                 {pastEvents.length > 0 ? (
-                  (() => {
-                    // Group events by seriesName
-                    const grouped = pastEvents.reduce((acc, ev) => {
-                      const key = ev.seriesName || 'General';
-                      if (!acc[key]) acc[key] = [];
-                      acc[key].push(ev);
-                      return acc;
-                    }, {} as Record<string, SatsangEvent[]>);
-
-                    return Object.entries(grouped).map(([series, events]) => (
-                      <div key={series} className="bg-white/5 border border-white/10 rounded-2xl p-5">
-                        <h4 className="font-bold text-[var(--color-dawn-gold)] mb-4 uppercase tracking-widest text-xs border-b border-white/10 pb-2">
-                          {series === 'General' ? (language === 'hi' ? 'अन्य सत्संग' : 'Other Satsangs') : series}
-                        </h4>
-                        <div className="flex flex-col gap-3">
-                          {events.sort((a, b) => (a.partNumber || 0) - (b.partNumber || 0)).map((ev) => (
-                            <a key={ev.id} href={ev.videoUrl || '#'} target="_blank" rel="noreferrer" className="hover:bg-white/10 rounded-xl p-3 flex items-center gap-4 cursor-pointer transition-colors group">
-                              <div className="w-20 h-12 rounded-lg bg-black/40 flex items-center justify-center relative overflow-hidden flex-shrink-0 border border-white/10">
-                                <img src={ev.thumbnailUrl || "https://i.postimg.cc/pVmNJGx9/IMG-20260412-WA0315.jpg"} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition-transform duration-500" alt="thumbnail" />
-                                <PlayCircle size={20} className="text-white relative z-10 drop-shadow-md" />
-                              </div>
-                              <div className="flex-grow">
-                                <h4 className="font-display text-[15px] text-white group-hover:text-[var(--color-dawn-gold)] transition-colors leading-tight mb-1">
-                                  {ev.partNumber ? `Part ${ev.partNumber}: ` : ''}{ev.title}
-                                </h4>
-                                <p className="font-body text-[11px] text-white/50 tracking-wider">{ev.dateStr} {ev.duration ? `• ${ev.duration}` : ''}</p>
-                              </div>
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    ));
-                  })()
+                  <SeriesFolders pastEvents={pastEvents} language={language} />
                 ) : (
                   <div className="text-center text-white/40 py-10 border border-white/5 rounded-2xl border-dashed">
                     No past recordings available.
@@ -181,6 +149,86 @@ export default function Satsang() {
           )}
         </div>
       </section>
+    </div>
+  );
+}
+
+function SeriesFolders({ pastEvents, language }: { pastEvents: SatsangEvent[], language: string }) {
+  const [expandedSeries, setExpandedSeries] = useState<string[]>([]);
+
+  // Group events by seriesName
+  const grouped = pastEvents.reduce((acc, ev) => {
+    const key = ev.seriesName || 'General';
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(ev);
+    return acc;
+  }, {} as Record<string, SatsangEvent[]>);
+
+  const toggleSeries = (series: string) => {
+    setExpandedSeries(prev => 
+      prev.includes(series) ? prev.filter(s => s !== series) : [...prev, series]
+    );
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      {Object.entries(grouped).map(([series, events]) => {
+        const isGeneral = series === 'General';
+        const displayTitle = isGeneral ? (language === 'hi' ? 'अन्य सत्संग' : 'Other Satsangs') : series;
+        const isExpanded = expandedSeries.includes(series) || (isGeneral && Object.keys(grouped).length === 1);
+        
+        return (
+          <div key={series} className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+            {/* Folder Header */}
+            <button 
+              onClick={() => toggleSeries(series)}
+              className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-[var(--color-dawn-gold)]">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
+                </div>
+                <div className="text-left">
+                  <h4 className="font-bold text-white text-base">{displayTitle}</h4>
+                  <p className="text-xs text-white/50 mt-0.5">{events.length} {language === 'hi' ? 'रिकॉर्डिंग' : 'Recordings'}</p>
+                </div>
+              </div>
+              <div className={`text-white/50 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+            </button>
+
+            {/* Folder Content (Recordings) */}
+            <AnimatePresence>
+              {isExpanded && (
+                <motion.div 
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="px-5 pb-5 border-t border-white/5"
+                >
+                  <div className="flex flex-col gap-3 mt-4">
+                    {events.sort((a, b) => (a.partNumber || 0) - (b.partNumber || 0)).map((ev) => (
+                      <a key={ev.id} href={ev.videoUrl || '#'} target="_blank" rel="noreferrer" className="hover:bg-white/10 bg-black/20 rounded-xl p-3 flex items-center gap-4 cursor-pointer transition-colors group">
+                        <div className="w-20 h-12 rounded-lg bg-black/40 flex items-center justify-center relative overflow-hidden flex-shrink-0 border border-white/10">
+                          <img src={ev.thumbnailUrl || "https://i.postimg.cc/pVmNJGx9/IMG-20260412-WA0315.jpg"} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition-transform duration-500" alt="thumbnail" />
+                          <PlayCircle size={20} className="text-white relative z-10 drop-shadow-md" />
+                        </div>
+                        <div className="flex-grow">
+                          <h4 className="font-display text-[15px] text-white group-hover:text-[var(--color-dawn-gold)] transition-colors leading-tight mb-1">
+                            {ev.partNumber ? `Part ${ev.partNumber}: ` : ''}{ev.title}
+                          </h4>
+                          <p className="font-body text-[11px] text-white/50 tracking-wider">{ev.dateStr} {ev.duration ? `• ${ev.duration}` : ''}</p>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        );
+      })}
     </div>
   );
 }
