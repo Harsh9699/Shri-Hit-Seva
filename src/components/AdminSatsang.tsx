@@ -75,8 +75,11 @@ export default function AdminSatsang() {
     });
   };
 
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
     try {
       let finalVideoUrl = currentEvent.videoUrl;
       let finalThumbnailUrl = currentEvent.thumbnailUrl;
@@ -110,7 +113,10 @@ export default function AdminSatsang() {
       fetchEvents();
     } catch (error) {
       console.error("Error saving event: ", error);
-      alert('Error saving event. Please make sure Firebase Storage is enabled and rules allow writes.');
+      alert('Error saving event! \n\nIf you are trying to upload a local file, Firebase is blocking it because you have not enabled Firebase Storage (which requires the free Blaze plan).\n\nPlease either upgrade Firebase or use the "External URL" box instead with a Google Drive link.');
+      setUploadProgress({ video: 0, thumbnail: 0 });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -140,6 +146,29 @@ export default function AdminSatsang() {
     setUploadProgress({ video: 0, thumbnail: 0 });
     setIsEditing(true);
   };
+
+  const handleRenameFolder = async (oldName: string) => {
+    const newName = window.prompt(`Enter new name for folder "${oldName}":`, oldName);
+    if (!newName || newName === oldName) return;
+
+    setIsLoading(true);
+    try {
+      const eventsToUpdate = events.filter(e => e.seriesName === oldName);
+      for (const ev of eventsToUpdate) {
+        if (ev.id) {
+          const docRef = doc(db, 'satsangs', ev.id);
+          await updateDoc(docRef, { seriesName: newName });
+        }
+      }
+      fetchEvents();
+    } catch (error) {
+      console.error("Error renaming folder:", error);
+      alert("Failed to rename folder.");
+      setIsLoading(false);
+    }
+  };
+
+  const uniqueSeriesNames = Array.from(new Set(events.map(e => e.seriesName).filter(Boolean))) as string[];
 
   if (!isAuthenticated) {
     return (
@@ -193,8 +222,11 @@ export default function AdminSatsang() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm opacity-70 mb-1">Series Name (e.g. Hit Harivansh Charitamrit)</label>
-                <input type="text" className="w-full bg-black/30 border border-white/20 rounded p-2 text-white" placeholder="Leave empty if standalone" value={currentEvent.seriesName || ''} onChange={e => setCurrentEvent({...currentEvent, seriesName: e.target.value})} />
+                <label className="block text-sm opacity-70 mb-1">Folder / Series Name (e.g. Hit Harivansh Charitamrit)</label>
+                <input type="text" list="series-list" className="w-full bg-black/30 border border-white/20 rounded p-2 text-white" placeholder="Type new or select existing..." value={currentEvent.seriesName || ''} onChange={e => setCurrentEvent({...currentEvent, seriesName: e.target.value})} />
+                <datalist id="series-list">
+                  {uniqueSeriesNames.map(s => <option key={s} value={s} />)}
+                </datalist>
               </div>
               <div>
                 <label className="block text-sm opacity-70 mb-1">Part Number (e.g. 1)</label>
@@ -231,13 +263,13 @@ export default function AdminSatsang() {
             {currentEvent.status === 'completed' && (
               <>
                 <div className="p-4 bg-black/20 rounded-lg border border-white/10">
-                  <label className="block text-sm font-bold text-[var(--color-dawn-gold)] mb-2 flex items-center gap-2"><UploadCloud size={16}/> Upload Video File</label>
-                  <input type="file" accept="video/*" onChange={e => setVideoFile(e.target.files?.[0] || null)} className="w-full text-sm opacity-70 mb-2" />
+                  <label className="block text-sm font-bold text-[var(--color-dawn-gold)] mb-2 flex items-center gap-2"><UploadCloud size={16}/> Upload Media File (Audio/Video)</label>
+                  <input type="file" accept="video/*,audio/*" onChange={e => setVideoFile(e.target.files?.[0] || null)} className="w-full text-sm opacity-70 mb-2" />
                   {uploadProgress.video > 0 && uploadProgress.video < 100 && (
                     <div className="w-full bg-white/10 rounded-full h-1.5 mt-2"><div className="bg-[var(--color-dawn-gold)] h-1.5 rounded-full" style={{width: `${uploadProgress.video}%`}}></div></div>
                   )}
                   <div className="text-xs opacity-50 mt-2">Or use an external URL:</div>
-                  <input type="text" className="w-full bg-black/30 border border-white/20 rounded p-2 text-white mt-1 text-sm" placeholder="https://youtube.com/..." value={currentEvent.videoUrl || ''} onChange={e => setCurrentEvent({...currentEvent, videoUrl: e.target.value})} />
+                  <input type="text" className="w-full bg-black/30 border border-white/20 rounded p-2 text-white mt-1 text-sm" placeholder="https://drive.google.com/..." value={currentEvent.videoUrl || ''} onChange={e => setCurrentEvent({...currentEvent, videoUrl: e.target.value})} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -260,8 +292,8 @@ export default function AdminSatsang() {
 
             <div className="flex justify-end gap-3 pt-4">
               <button type="button" onClick={resetForm} className="px-4 py-2 opacity-70 hover:opacity-100">Cancel</button>
-              <button type="submit" disabled={uploadProgress.video > 0 && uploadProgress.video < 100} className="bg-[var(--color-dawn-gold)] text-[#0B192C] px-6 py-2 rounded font-bold disabled:opacity-50">
-                {uploadProgress.video > 0 && uploadProgress.video < 100 ? `Uploading (${uploadProgress.video}%)` : 'Save Satsang'}
+              <button type="submit" disabled={isSaving || (uploadProgress.video > 0 && uploadProgress.video < 100)} className="bg-[var(--color-dawn-gold)] text-[#0B192C] px-6 py-2 rounded font-bold disabled:opacity-50">
+                {isSaving ? 'Processing...' : (uploadProgress.video > 0 && uploadProgress.video < 100 ? `Uploading (${uploadProgress.video}%)` : 'Save Satsang')}
               </button>
             </div>
           </form>
@@ -270,33 +302,83 @@ export default function AdminSatsang() {
         {isLoading ? (
           <div className="text-center opacity-50 py-10">Loading events...</div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-8">
             {events.length === 0 ? (
               <div className="text-center opacity-50 py-10 border border-white/10 border-dashed rounded-xl">No satsangs found in database.</div>
             ) : (
-              events.map(ev => (
-                <div key={ev.id} className="bg-white/5 border border-white/10 rounded-xl p-4 flex justify-between items-center">
-                  <div className="flex items-center gap-4">
-                    {ev.status === 'upcoming' ? (
-                      <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-300"><Video size={20} /></div>
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center text-green-300"><PlayCircle size={20} /></div>
-                    )}
-                    <div>
-                      <h3 className="font-bold text-lg">{ev.title}</h3>
-                      <div className="text-sm opacity-60 flex gap-3">
-                        <span className="flex items-center gap-1"><Calendar size={14}/> {ev.dateStr}</span>
-                        {ev.seriesName && <span className="bg-white/10 px-2 py-0.5 rounded text-xs">{ev.seriesName} (Part {ev.partNumber})</span>}
-                        <span className="uppercase text-xs font-bold px-2 py-0.5 rounded bg-white/10">{ev.status}</span>
+              (() => {
+                // Group by seriesName
+                const grouped = events.reduce((acc, ev) => {
+                  const key = ev.seriesName || 'General';
+                  if (!acc[key]) acc[key] = [];
+                  acc[key].push(ev);
+                  return acc;
+                }, {} as Record<string, SatsangEvent[]>);
+
+                return Object.entries(grouped).map(([series, folderEvents]) => {
+                  const isGeneral = series === 'General';
+                  return (
+                    <div key={series} className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                      <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold text-[var(--color-dawn-gold)] uppercase tracking-widest text-sm">
+                            {isGeneral ? 'Other Satsangs (No Folder)' : series}
+                          </h3>
+                          <span className="text-xs text-white/50 bg-black/20 px-2 py-0.5 rounded-full">{folderEvents.length}</span>
+                        </div>
+                        
+                        {!isGeneral && (
+                          <div className="flex gap-2">
+                            <button 
+                              onClick={() => handleRenameFolder(series)}
+                              className="text-xs flex items-center gap-1 opacity-70 hover:opacity-100 bg-white/10 px-3 py-1.5 rounded-lg"
+                            >
+                              <Edit2 size={12}/> Rename
+                            </button>
+                            <button 
+                              onClick={() => {
+                                resetForm();
+                                setCurrentEvent(prev => ({...prev, seriesName: series, partNumber: folderEvents.length + 1}));
+                                setIsEditing(true);
+                              }}
+                              className="text-xs flex items-center gap-1 bg-[var(--color-dawn-gold)] text-black font-bold px-3 py-1.5 rounded-lg hover:brightness-110"
+                            >
+                              <Plus size={12}/> Add Here
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-3">
+                        {folderEvents.sort((a, b) => (a.partNumber || 0) - (b.partNumber || 0)).map(ev => (
+                          <div key={ev.id} className="bg-black/30 border border-white/5 rounded-xl p-3 flex justify-between items-center hover:bg-black/40 transition-colors">
+                            <div className="flex items-center gap-4">
+                              {ev.status === 'upcoming' ? (
+                                <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-300"><Video size={16} /></div>
+                              ) : (
+                                <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-300"><PlayCircle size={16} /></div>
+                              )}
+                              <div>
+                                <h3 className="font-bold text-base leading-tight">
+                                  {ev.partNumber && !isGeneral ? `Part ${ev.partNumber}: ` : ''}{ev.title}
+                                </h3>
+                                <div className="text-xs opacity-60 flex gap-3 mt-1">
+                                  <span className="flex items-center gap-1"><Calendar size={12}/> {ev.dateStr}</span>
+                                  <span className="uppercase text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10">{ev.status}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex gap-1">
+                              <button onClick={() => editEvent(ev)} className="p-2 hover:bg-white/10 rounded"><Edit2 size={16} /></button>
+                              <button onClick={() => handleDelete(ev.id!)} className="p-2 hover:bg-red-500/20 text-red-400 rounded"><Trash2 size={16} /></button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button onClick={() => editEvent(ev)} className="p-2 hover:bg-white/10 rounded"><Edit2 size={18} /></button>
-                    <button onClick={() => handleDelete(ev.id!)} className="p-2 hover:bg-red-500/20 text-red-400 rounded"><Trash2 size={18} /></button>
-                  </div>
-                </div>
-              ))
+                  );
+                });
+              })()
             )}
           </div>
         )}
