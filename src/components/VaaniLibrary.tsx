@@ -4,7 +4,7 @@ import { Search, ChevronDown, Hash, Maximize2, X, ChevronLeft, ChevronRight } fr
 import { useLanguage } from '../context/LanguageContext';
 import { VAANI_SECTIONS } from '../constants/vaanis';
 
-export default function VaaniLibrary() {
+export default function VaaniLibrary({ onNavigate }: { onNavigate?: (page: string) => void }) {
   const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState('mangalacharan');
   const [activeSubTab, setActiveSubTab] = useState<string | null>(null);
@@ -145,11 +145,20 @@ export default function VaaniLibrary() {
             <>Vaani <em className="italic text-[var(--color-saffron)]">Library</em></>
           )}
         </h1>
-        <p className="text-[16px] font-light text-[var(--color-ins)] leading-relaxed max-w-[480px] mx-auto mt-2 relative z-10">
+        <p className="text-[16px] font-light text-[var(--color-ins)] leading-relaxed max-w-[480px] mx-auto mt-2 relative z-10 mb-6">
           {language === 'hi'
             ? 'राधावल्लभ संप्रदाय के संपूर्ण पवित्र ग्रंथ — पूरी तरह से संकलित और एकीकृत'
             : 'Complete sacred texts of the Radhavallabh Sampradaya — fully extracted & integrated'}
         </p>
+
+        {onNavigate && (
+          <button 
+            onClick={() => onNavigate('kanthasth')}
+            className="mb-8 relative z-10 px-8 py-3 rounded-full bg-linear-to-r from-[var(--color-gold)] to-yellow-200 text-[#0B192C] font-bold tracking-wide shadow-[0_4px_15px_rgba(214,185,92,0.3)] hover:-translate-y-1 transition-transform border border-white/20"
+          >
+            {language === 'hi' ? '📖 कंठस्थ (दीक्षा तैयारी)' : '📖 Kanthasth (Diksha Prep)'}
+          </button>
+        )}
         
         <div className="flex justify-center gap-9 mt-7 relative z-10 flex-wrap">
           {VAANI_SECTIONS.map((s) => (

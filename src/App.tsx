@@ -13,6 +13,7 @@ import Satsang from './components/Satsang';
 import AdminSatsang from './components/AdminSatsang';
 import { LanguageProvider } from './context/LanguageContext';
 import VaaniLibrary from './components/VaaniLibrary';
+import Kanthasth from './components/Kanthasth';
 import JapCounter from './components/JapCounter';
 import GuruSanidhya from './components/GuruSanidhya';
 import UtsavCalendar from './components/UtsavCalendar';
@@ -82,8 +83,9 @@ export default function App() {
                 onOpenChat={() => setIsChatOpen(true)} 
               />
             )}
-            {activePage === 'vaanis' && <VaaniLibrary />}
+            {activePage === 'vaanis' && <VaaniLibrary onNavigate={setActivePage} />}
             {activePage === 'satsang' && <Satsang />}
+            {activePage === 'kanthasth' && <Kanthasth />}
             {activePage === 'calendar' && <UtsavCalendar />}
             {activePage === 'jap' && <JapCounter />}
             {activePage === 'sanidhya' && <GuruSanidhya />}
