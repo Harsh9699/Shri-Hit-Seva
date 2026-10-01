@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { BookOpen, CheckCircle, Target, ChevronRight, RefreshCw, X, PlayCircle } from 'lucide-react';
@@ -7,11 +7,6 @@ import { SHRI_HIT_MANGAL_GAAN_VAANIS } from '../constants/mangalgann';
 import { VAANI_SECTIONS } from '../constants/vaanis';
 import { Vaani } from '../types';
 
-// Extract required Vaanis for the syllabus
-const mangalacharan = VAANI_SECTIONS.find(s => s.id === 'mangalacharan')?.vaanis || [];
-const chaturasiFirst12 = HIT_CHAURASI_VAANIS.slice(0, 12);
-const mangalGaan = SHRI_HIT_MANGAL_GAAN_VAANIS;
-
 interface SyllabusItem {
   id: string;
   title: string;
@@ -19,17 +14,23 @@ interface SyllabusItem {
   data: Vaani | any;
 }
 
-const syllabus: SyllabusItem[] = [
-  ...mangalacharan.map(v => ({ id: v.id, title: v.title, category: 'Manglacharan', data: v })),
-  ...chaturasiFirst12.map(v => ({ id: v.id, title: v.title, category: 'Shri Hit Chaturasi', data: v })),
-  ...mangalGaan.map(v => ({ id: v.id, title: v.title, category: 'Mangal Gaan', data: v }))
-];
-
 export default function Kanthasth() {
   const { language } = useLanguage();
   const [progress, setProgress] = useState<Record<string, number>>({});
   const [activeItem, setActiveItem] = useState<SyllabusItem | null>(null);
   const [mode, setMode] = useState<'menu' | 'blanks' | 'reveal' | 'scramble'>('menu');
+
+  const syllabus = useMemo<SyllabusItem[]>(() => {
+    const mangalacharan = VAANI_SECTIONS?.find(s => s.id === 'mangalacharan')?.vaanis || [];
+    const chaturasiFirst12 = HIT_CHAURASI_VAANIS?.slice(0, 12) || [];
+    const mangalGaan = SHRI_HIT_MANGAL_GAAN_VAANIS || [];
+
+    return [
+      ...mangalacharan.map(v => ({ id: v.id, title: v.title, category: 'Manglacharan', data: v })),
+      ...chaturasiFirst12.map(v => ({ id: v.id, title: v.title, category: 'Shri Hit Chaturasi', data: v })),
+      ...mangalGaan.map(v => ({ id: v.id, title: v.title, category: 'Mangal Gaan', data: v }))
+    ];
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem('kanthasth_progress');
