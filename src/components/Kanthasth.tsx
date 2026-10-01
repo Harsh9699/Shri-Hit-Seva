@@ -209,6 +209,7 @@ function BlanksMode({ fullText, onComplete, language }: { fullText: string, onCo
   const [wordBank, setWordBank] = useState<string[]>([]);
   const [finished, setFinished] = useState(false);
   const [mistakes, setMistakes] = useState(0);
+  const [activeBlankIndex, setActiveBlankIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const candidates = [];
@@ -218,27 +219,40 @@ function BlanksMode({ fullText, onComplete, language }: { fullText: string, onCo
     
     const numToHide = Math.max(1, Math.floor(candidates.length * 0.25));
     const shuffled = [...candidates].sort(() => 0.5 - Math.random());
-    const selectedIndices = shuffled.slice(0, numToHide);
+    const selectedIndices = shuffled.slice(0, numToHide).sort((a, b) => a - b);
     
     const newBlanks = selectedIndices.map(i => ({ index: i, word: words[i], filledWith: null }));
     setBlanks(newBlanks);
-    
     setWordBank([...newBlanks.map(b => b.word)].sort(() => 0.5 - Math.random()));
+    
+    if (newBlanks.length > 0) {
+      setActiveBlankIndex(newBlanks[0].index);
+    }
   }, [fullText]);
 
   const handleWordSelect = (word: string) => {
-    const nextBlank = blanks.findIndex(b => b.filledWith === null);
-    if (nextBlank === -1) return;
+    if (activeBlankIndex === null) return;
+    
+    const targetIdx = blanks.findIndex(b => b.index === activeBlankIndex);
+    if (targetIdx === -1) return;
 
     const newBlanks = [...blanks];
-    newBlanks[nextBlank].filledWith = word;
+    newBlanks[targetIdx].filledWith = word;
     setBlanks(newBlanks);
+
+    // Auto-advance to the next empty blank
+    const nextEmpty = newBlanks.find(b => b.filledWith === null);
+    setActiveBlankIndex(nextEmpty ? nextEmpty.index : null);
   };
 
   const handleUndo = (blankIndex: number) => {
+    const targetIdx = blanks.findIndex(b => b.index === blankIndex);
+    if (targetIdx === -1) return;
+
     const newBlanks = [...blanks];
-    newBlanks[blankIndex].filledWith = null;
+    newBlanks[targetIdx].filledWith = null;
     setBlanks(newBlanks);
+    setActiveBlankIndex(blankIndex);
   };
 
   const checkAnswer = () => {
@@ -259,6 +273,9 @@ function BlanksMode({ fullText, onComplete, language }: { fullText: string, onCo
       setFinished(true);
     } else {
       setBlanks(newBlanks);
+      // Reset active blank to the first wrong one
+      const firstWrong = newBlanks.find(b => b.filledWith === null);
+      if (firstWrong) setActiveBlankIndex(firstWrong.index);
     }
   };
 
@@ -269,21 +286,31 @@ function BlanksMode({ fullText, onComplete, language }: { fullText: string, onCo
 
   return (
     <div className="flex flex-col h-[calc(100vh-200px)]">
+      <div className="text-white/50 text-sm mb-4 text-center">Tap a blank space to select it, then choose a word from below.</div>
       <div className="bg-white/5 border border-white/10 rounded-3xl p-6 flex-grow overflow-y-auto mb-6">
         <div className="font-devanagari text-xl leading-relaxed text-white/90">
           {words.map((w, i) => {
             const blank = blanks.find(b => b.index === i);
             if (blank) {
+              const isActive = activeBlankIndex === blank.index;
               if (blank.filledWith) {
                 return (
-                  <span key={i} onClick={() => handleUndo(blanks.indexOf(blank))} className="inline-block px-3 py-1 mx-1 rounded bg-[var(--color-dawn-gold)] text-black font-bold cursor-pointer">
+                  <span 
+                    key={i} 
+                    onClick={() => handleUndo(blank.index)} 
+                    className={`inline-block px-3 py-1 mx-1 rounded text-black font-bold cursor-pointer transition-all shadow-sm ${isActive ? 'bg-yellow-100 ring-2 ring-white scale-110' : 'bg-[var(--color-dawn-gold)]'}`}
+                  >
                     {blank.filledWith}
                   </span>
                 );
               }
               return (
-                <span key={i} className="inline-block px-6 py-1 mx-1 rounded bg-black/40 border border-dashed border-white/30 text-transparent">
-                  __
+                <span 
+                  key={i} 
+                  onClick={() => setActiveBlankIndex(blank.index)}
+                  className={`inline-block px-6 py-1 mx-1 rounded cursor-pointer transition-all border ${isActive ? 'bg-white/20 border-white text-white scale-110 shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'bg-black/40 border-white/30 border-dashed text-transparent'}`}
+                >
+                  {isActive ? '?' : '__'}
                 </span>
               );
             }
