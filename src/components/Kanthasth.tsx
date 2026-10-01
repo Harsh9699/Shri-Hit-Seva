@@ -24,9 +24,14 @@ export default function Kanthasth() {
     const mangalacharan = VAANI_SECTIONS?.find(s => s.id === 'mangalacharan')?.vaanis || [];
     const chaturasiFirst12 = HIT_CHAURASI_VAANIS?.slice(0, 12) || [];
     const mangalGaan = SHRI_HIT_MANGAL_GAAN_VAANIS || [];
+    
+    // Find Ishtaradhan Prakaran from Sevak Vani section
+    const sevakVaniSection = VAANI_SECTIONS?.find(s => s.id === 'sevakvani');
+    const ishtaradhan = sevakVaniSection?.subSections?.find(ss => ss.id === 'sv_chap5')?.vaanis || [];
 
     return [
       ...mangalacharan.map(v => ({ id: v.id, title: v.title, category: 'Manglacharan', data: v })),
+      ...ishtaradhan.map(v => ({ id: v.id, title: v.title, category: 'Ishtaradhan Prakaran', data: v })),
       ...chaturasiFirst12.map(v => ({ id: v.id, title: v.title, category: 'Shri Hit Chaturasi', data: v })),
       ...mangalGaan.map(v => ({ id: v.id, title: v.title, category: 'Mangal Gaan', data: v }))
     ];

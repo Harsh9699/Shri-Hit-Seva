@@ -1,4 +1,4 @@
-import { SEVAK_VANI_CHAPTER_1, SEVAK_VANI_CHAPTER_2 } from './sevak_vani';
+import { SEVAK_VANI_CHAPTER_1, SEVAK_VANI_CHAPTER_2, SEVAK_VANI_CHAPTER_5 } from './sevak_vani';
 import { VaaniSection } from '../types';
 import { HIT_CHAURASI_VAANIS } from './hitchaurasi';
 import { SHRI_HIT_MANGAL_GAAN_VAANIS } from './mangalgann';
@@ -30,6 +30,11 @@ export const VAANI_SECTIONS: VaaniSection[] = [
         id: 'sv_chap2',
         title: '2. Shri Hit Ras-Vilas Prakaran',
         vaanis: SEVAK_VANI_CHAPTER_2
+      },
+      {
+        id: 'sv_chap5',
+        title: '5. Shri Hit Ishtaradhan Prakaran',
+        vaanis: SEVAK_VANI_CHAPTER_5
       }
     ]
   },
