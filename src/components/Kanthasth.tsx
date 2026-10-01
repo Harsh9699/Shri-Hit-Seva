@@ -281,7 +281,15 @@ function BlanksMode({ fullText, onComplete, language }: { fullText: string, onCo
   };
 
   const allFilled = blanks.every(b => b.filledWith !== null);
-  const unusedWords = wordBank.filter(w => !blanks.some(b => b.filledWith === w));
+  const unusedWords = [...wordBank];
+  blanks.forEach(b => {
+    if (b.filledWith) {
+      const idx = unusedWords.indexOf(b.filledWith);
+      if (idx !== -1) {
+        unusedWords.splice(idx, 1);
+      }
+    }
+  });
 
   if (finished) return <CompletionScreen score={Math.max(10, 100 - (mistakes * 10))} language={language} onBack={() => {}} />;
 
